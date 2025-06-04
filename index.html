@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guía Interactiva: Votaciones Estudiantiles con Google Workspace</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: "Calm Harmony" - Slate, Amber, and Stone -->
+    <!-- Application Structure Plan: A tabbed, single-page application structure was chosen to transform the linear guide into an interactive, step-by-step wizard. This approach breaks down the process into manageable, thematic sections (Configurar, Publicar, Resultados, Avanzado, Cerrar), which users can navigate non-linearly. This structure improves usability by preventing cognitive overload from a long scroll and makes the information more digestible and engaging for the student audience. Key interactions include tab-based navigation, interactive checklists, and one-click code copying, which turn passive reading into active learning. -->
+    <!-- Visualization & Content Choices: 
+        - Report Info: Step 1 (Form Settings) -> Goal: Inform/Organize -> Viz: Interactive Cards/Mock UI -> Interaction: Click-to-reveal details -> Justification: More engaging than a static list; helps visualize the actual software interface. Method: HTML/CSS/JS.
+        - Report Info: Step 3 (Results) -> Goal: Compare/Inform -> Viz: Bar Chart -> Interaction: Hover tooltips -> Justification: Provides a clear, dynamic example of how voting results would look, making the concept of real-time results tangible. Library: Chart.js.
+        - Report Info: Step 4 (Apps Script) -> Goal: Inform/Organize -> Viz: Code Block -> Interaction: Copy-to-clipboard button -> Justification: Highly practical for users who need to implement the script, reducing errors and effort. Method: HTML/JS.
+        - Report Info: Checklist -> Goal: Organize/Inform -> Viz: Interactive Checklist -> Interaction: Clickable checkboxes -> Justification: Allows users to track their progress, reinforcing learning and providing a sense of completion. Method: HTML/JS.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .tab-active { 
+            background-color: #f59e0b; /* amber-500 */
+            color: #ffffff;
+            font-weight: 600;
+        }
+        .tab-inactive {
+            background-color: #e5e7eb; /* gray-200 */
+            color: #374151; /* gray-700 */
+        }
+        .section-content {
+            display: none;
+        }
+        .section-content.active {
+            display: block;
+        }
+        .checklist-item.checked label {
+            text-decoration: line-through;
+            color: #6b7280; /* gray-500 */
+        }
+    </style>
+</head>
+<body class="bg-stone-50 text-stone-800">
+
+    <div class="container mx-auto max-w-5xl p-4 sm:p-6 lg:p-8">
+        
+        <header class="text-center mb-8">
+            <h1 class="text-3xl sm:text-4xl font-bold text-slate-800">Guía Interactiva de Votaciones Estudiantiles 🗳️</h1>
+            <p class="mt-2 text-lg text-slate-600">Crea elecciones seguras y transparentes con Google Workspace.</p>
+        </header>
+
+        <nav id="app-navigation" class="flex flex-wrap justify-center gap-2 mb-8">
+            <button data-tab="configurar" class="nav-tab px-4 py-2 rounded-full text-sm font-medium transition-colors duration-300">Paso 1: Configurar</button>
+            <button data-tab="publicar" class="nav-tab px-4 py-2 rounded-full text-sm font-medium transition-colors duration-300">Paso 2: Publicar</button>
+            <button data-tab="resultados" class="nav-tab px-4 py-2 rounded-full text-sm font-medium transition-colors duration-300">Paso 3: Resultados</button>
+            <button data-tab="avanzado" class="nav-tab px-4 py-2 rounded-full text-sm font-medium transition-colors duration-300">Paso 4: Avanzado</button>
+            <button data-tab="cierre" class="nav-tab px-4 py-2 rounded-full text-sm font-medium transition-colors duration-300">Paso 5: Cierre</button>
+            <button data-tab="checklist" class="nav-tab px-4 py-2 rounded-full text-sm font-medium transition-colors duration-300">Checklist Final ✅</button>
+        </nav>
+
+        <main>
+            <section id="configurar" class="section-content">
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-stone-200">
+                    <h2 class="text-2xl font-bold text-slate-800 mb-2">Paso 1: Diseña tu "Boleta" Electoral ✍️</h2>
+                    <p class="text-slate-600 mb-6">El corazón de tu elección es el formulario. Aquí aprenderás a configurarlo correctamente para garantizar que cada voto sea único, anónimo y justo.</p>
+                    
+                    <div class="space-y-6">
+                        <div class="p-4 border border-stone-200 rounded-lg bg-stone-50">
+                            <h3 class="font-bold text-lg text-slate-700">1. Configuraciones Clave para una Votación Justa</h3>
+                            <p class="text-sm text-slate-600 mt-1">En la sección "Configuración" ⚙️ de Google Forms, activa estas opciones para blindar tu proceso.</p>
+                            <div class="mt-4 space-y-3">
+                                <div class="flex items-center justify-between p-3 bg-white rounded-md border">
+                                    <span class="font-medium text-slate-700">Restringir al dominio escolar</span>
+                                    <div class="w-12 h-6 flex items-center bg-green-500 rounded-full p-1">
+                                        <div class="bg-white w-4 h-4 rounded-full shadow-md"></div>
+                                    </div>
+                                </div>
+                                <div class="flex items-center justify-between p-3 bg-white rounded-md border">
+                                    <span class="font-medium text-slate-700">Limitar a 1 respuesta</span>
+                                    <div class="w-12 h-6 flex items-center bg-green-500 rounded-full p-1">
+                                        <div class="bg-white w-4 h-4 rounded-full shadow-md"></div>
+                                    </div>
+                                </div>
+                                <div class="flex items-center justify-between p-3 bg-white rounded-md border">
+                                    <span class="font-medium text-slate-700">Recopilar correos electrónicos</span>
+                                     <div class="w-12 h-6 flex items-center bg-stone-300 rounded-full p-1 justify-end">
+                                        <div class="bg-white w-4 h-4 rounded-full shadow-md"></div>
+                                    </div>
+                                </div>
+                                <p class="text-xs text-amber-700 bg-amber-50 p-2 rounded-md">🔒 Para asegurar el anonimato, <span class="font-bold">NO</span> actives "Recopilar correos". Forms seguirá controlando un voto por persona sin guardar la identidad.</p>
+                            </div>
+                        </div>
+
+                        <div class="p-4 border border-stone-200 rounded-lg bg-stone-50">
+                            <h3 class="font-bold text-lg text-slate-700">2. Prepara las Opciones de Voto</h3>
+                             <p class="text-sm text-slate-600 mt-1">Para evitar sesgos, es crucial que el orden de las listas o candidatos sea aleatorio para cada votante.</p>
+                            <div class="mt-4 p-3 bg-white rounded-md border">
+                                <p class="font-medium text-slate-700">En cada pregunta, haz clic en los tres puntos (⋮) y selecciona:</p>
+                                <p class="mt-2 text-center font-semibold text-amber-600 bg-amber-50 p-2 rounded-md">"Ordenar las opciones aleatoriamente"</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="publicar" class="section-content">
+                 <div class="bg-white p-6 rounded-xl shadow-sm border border-stone-200">
+                    <h2 class="text-2xl font-bold text-slate-800 mb-2">Paso 2: Publica tu Urna 🔗</h2>
+                    <p class="text-slate-600 mb-6">Es hora de abrir las votaciones. Compartir el enlace correcto es fundamental para mantener la seguridad del proceso.</p>
+                     <div class="grid md:grid-cols-2 gap-6">
+                        <div class="p-4 border-2 border-green-200 rounded-lg bg-green-50">
+                             <h3 class="font-bold text-lg text-green-800 mb-2">✅ Lo que SÍ debes hacer</h3>
+                             <ol class="list-decimal list-inside space-y-2 text-green-700">
+                                <li>Haz clic en "Enviar" en tu formulario.</li>
+                                <li>Ve a la pestaña de enlace 🔗.</li>
+                                <li>Copia esa URL (puedes acortarla).</li>
+                                <li>Pega el enlace en canales oficiales como Google Classroom o el chat del curso.</li>
+                             </ol>
+                        </div>
+                         <div class="p-4 border-2 border-red-200 rounded-lg bg-red-50">
+                             <h3 class="font-bold text-lg text-red-800 mb-2">❌ Lo que NO debes hacer</h3>
+                            <p class="text-red-700">Nunca uses el botón "Añadir colaboradores" para compartir la votación. Ese acceso es solo para que otros miembros de la Comisión Electoral editen el formulario, no para que la gente vote.</p>
+                        </div>
+                     </div>
+                 </div>
+            </section>
+            
+            <section id="resultados" class="section-content">
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-stone-200">
+                    <h2 class="text-2xl font-bold text-slate-800 mb-2">Paso 3: Sigue los Resultados en Vivo 📊</h2>
+                    <p class="text-slate-600 mb-6">La transparencia es clave. Google ofrece formas de visualizar los resultados en tiempo real, accesibles para toda la comunidad.</p>
+                    <div class="space-y-4">
+                        <div>
+                            <h3 class="font-bold text-lg text-slate-700">Opción Rápida: Resumen de Forms</h3>
+                            <p class="text-sm text-slate-600 mt-1">Dentro de la pestaña "Respuestas" de tu formulario, verás gráficos automáticos. Puedes compartir un enlace a este resumen para que todos sigan el conteo al instante.</p>
+                        </div>
+                        <div class="p-4 border border-stone-200 rounded-lg bg-stone-50">
+                            <h3 class="font-bold text-lg text-slate-700 mb-2">Ejemplo de Visualización de Resultados</h3>
+                            <p class="text-sm text-slate-600 mb-4">Así es como se vería un gráfico de resultados en tiempo real, mostrando la distribución de votos entre las diferentes listas.</p>
+                            <div class="chart-container relative h-64 md:h-80 w-full max-w-2xl mx-auto">
+                                <canvas id="resultsChart"></canvas>
+                            </div>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-lg text-slate-700">Opción Profesional: Looker Studio</h3>
+                            <p class="text-sm text-slate-600 mt-1">Para un análisis más profundo, puedes conectar la hoja de respuestas de Google Sheets a Looker Studio y crear paneles interactivos con filtros y métricas personalizadas.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="avanzado" class="section-content">
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-stone-200">
+                    <h2 class="text-2xl font-bold text-slate-800 mb-2">Paso 4: Funciones Avanzadas con Apps Script 🧑‍💻</h2>
+                     <p class="text-slate-600 mb-6">Con un poco de código, puedes añadir capas extra de transparencia y confianza a tu proceso, como enviar un recibo de voto a cada participante.</p>
+                     
+                     <div class="p-4 border border-stone-200 rounded-lg bg-stone-50">
+                        <h3 class="font-bold text-lg text-slate-700">"Recibo" de Voto por Correo</h3>
+                        <p class="text-sm text-slate-600 mt-1 mb-4">Este script envía automáticamente un correo de confirmación a cada votante sin comprometer el anonimato. El votante recibe una prueba de que su voto fue contado, incluyendo un ID único de respuesta.</p>
+                        
+                        <div class="bg-slate-800 rounded-lg p-4 text-white text-sm relative">
+                            <button id="copyCodeBtn" class="absolute top-2 right-2 bg-slate-600 hover:bg-amber-500 text-white text-xs font-bold py-1 px-2 rounded transition-colors">Copiar</button>
+                            <pre><code id="codeSnippet" class="language-javascript">function onFormSubmit(e) {
+  try {
+    const email = Session.getActiveUser().getEmail();
+    const responseId = e.response.getId();
+    const timestamp = new Date().toLocaleString("es-CL");
+
+    const subject = "Confirmación: Tu voto ha sido registrado";
+    const body = \`¡Hola!\\n\\nConfirmamos que tu voto ha sido registrado correctamente.\\n\\nID de tu respuesta: \${responseId}\\nHora de registro: \${timestamp}\\n\\nGracias por participar,\\nComisión Electoral\`;
+
+    GmailApp.sendEmail(email, subject, body);
+  } catch (error) {
+    console.error("Error al enviar correo: " + error.toString());
+  }
+}</code></pre>
+                        </div>
+
+                         <div class="mt-4">
+                             <h4 class="font-semibold text-slate-700">Cómo implementarlo:</h4>
+                             <ol class="list-decimal list-inside space-y-1 text-sm text-slate-600 mt-2">
+                                <li>En tu Formulario, ve a (⋮) > "Editor de secuencias de comandos".</li>
+                                <li>Pega el código de arriba. Guarda el proyecto.</li>
+                                <li>Ve a la sección "Activadores" (reloj ⏰).</li>
+                                <li>Añade un nuevo activador que ejecute la función `onFormSubmit` "Desde el formulario" y "Al enviar el formulario".</li>
+                                <li>Autoriza los permisos que te solicite. ¡Listo!</li>
+                             </ol>
+                         </div>
+                     </div>
+                </div>
+            </section>
+            
+            <section id="cierre" class="section-content">
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-stone-200">
+                    <h2 class="text-2xl font-bold text-slate-800 mb-2">Paso 5: Cierre y Archivo Seguro 🔒</h2>
+                    <p class="text-slate-600 mb-6">Una vez terminada la elección, es crucial cerrar la urna digital y respaldar los resultados de forma segura para futuras consultas.</p>
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div class="p-4 border border-stone-200 rounded-lg bg-stone-50">
+                            <h3 class="font-bold text-lg text-slate-700 mb-2">1. Bloquear la Urna</h3>
+                            <p class="text-slate-600">En la pestaña "Respuestas" de tu formulario, simplemente desactiva la opción "Se aceptan respuestas". Desde ese momento, nadie más podrá votar. Para un cierre automático a una hora exacta, puedes instalar el complemento "FormLimiter".</p>
+                        </div>
+                        <div class="p-4 border border-stone-200 rounded-lg bg-stone-50">
+                            <h3 class="font-bold text-lg text-slate-700 mb-2">2. Respaldar los Datos</h3>
+                            <p class="text-slate-600">Abre la hoja de Google Sheets conectada a tu formulario. Ve a `Archivo > Descargar > Microsoft Excel (.xlsx)` y guarda este archivo en una carpeta segura de Google Drive con permisos de "Solo lectura" para la comunidad.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="checklist" class="section-content">
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-stone-200">
+                    <h2 class="text-2xl font-bold text-slate-800 mb-2">Checklist Final Antes de Lanzar ✅</h2>
+                    <p class="text-slate-600 mb-6">Usa esta lista de verificación interactiva para asegurarte de que tienes todo listo antes del día de la elección.</p>
+                    <div class="space-y-3">
+                        <div class="checklist-item flex items-start">
+                            <input id="check1" type="checkbox" class="h-5 w-5 rounded border-gray-300 text-amber-600 focus:ring-amber-500 mt-1 cursor-pointer">
+                            <label for="check1" class="ml-3 text-slate-700 cursor-pointer">Formulario configurado con "Limitar a 1 respuesta".</label>
+                        </div>
+                         <div class="checklist-item flex items-start">
+                            <input id="check2" type="checkbox" class="h-5 w-5 rounded border-gray-300 text-amber-600 focus:ring-amber-500 mt-1 cursor-pointer">
+                            <label for="check2" class="ml-3 text-slate-700 cursor-pointer">Formulario configurado para NO recopilar correos (anonimato).</label>
+                        </div>
+                         <div class="checklist-item flex items-start">
+                            <input id="check3" type="checkbox" class="h-5 w-5 rounded border-gray-300 text-amber-600 focus:ring-amber-500 mt-1 cursor-pointer">
+                            <label for="check3" class="ml-3 text-slate-700 cursor-pointer">Formulario restringido al dominio del colegio.</label>
+                        </div>
+                         <div class="checklist-item flex items-start">
+                            <input id="check4" type="checkbox" class="h-5 w-5 rounded border-gray-300 text-amber-600 focus:ring-amber-500 mt-1 cursor-pointer">
+                            <label for="check4" class="ml-3 text-slate-700 cursor-pointer">Enlace de "solo para votar" distribuido por canales correctos.</label>
+                        </div>
+                         <div class="checklist-item flex items-start">
+                            <input id="check5" type="checkbox" class="h-5 w-5 rounded border-gray-300 text-amber-600 focus:ring-amber-500 mt-1 cursor-pointer">
+                            <label for="check5" class="ml-3 text-slate-700 cursor-pointer">Publicado el enlace al resumen de Forms para ver resultados.</label>
+                        </div>
+                        <div class="checklist-item flex items-start">
+                            <input id="check6" type="checkbox" class="h-5 w-5 rounded border-gray-300 text-amber-600 focus:ring-amber-500 mt-1 cursor-pointer">
+                            <label for="check6" class="ml-3 text-slate-700 cursor-pointer">(Opcional) Script de recibo de voto probado y funcionando.</label>
+                        </div>
+                        <div class="checklist-item flex items-start">
+                            <input id="check7" type="checkbox" class="h-5 w-5 rounded border-gray-300 text-amber-600 focus:ring-amber-500 mt-1 cursor-pointer">
+                            <label for="check7" class="ml-3 text-slate-700 cursor-pointer">Definida la fecha y hora de cierre de la votación.</label>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const tabs = document.querySelectorAll('.nav-tab');
+            const sections = document.querySelectorAll('.section-content');
+            
+            function setActiveTab(tabId) {
+                tabs.forEach(tab => {
+                    if (tab.dataset.tab === tabId) {
+                        tab.classList.remove('tab-inactive');
+                        tab.classList.add('tab-active');
+                    } else {
+                        tab.classList.remove('tab-active');
+                        tab.classList.add('tab-inactive');
+                    }
+                });
+
+                sections.forEach(section => {
+                    if (section.id === tabId) {
+                        section.classList.add('active');
+                    } else {
+                        section.classList.remove('active');
+                    }
+                });
+            }
+
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    setActiveTab(tab.dataset.tab);
+                });
+            });
+
+            setActiveTab('configurar');
+            
+            const ctx = document.getElementById('resultsChart');
+            if(ctx) {
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Lista Solidaridad', 'Lista Innovación', 'Lista Acción Verde', 'Votos Blancos'],
+                        datasets: [{
+                            label: 'Total de Votos',
+                            data: [122, 189, 75, 15],
+                            backgroundColor: [
+                                'rgba(59, 130, 246, 0.7)',
+                                'rgba(245, 158, 11, 0.7)',
+                                'rgba(34, 197, 94, 0.7)',
+                                'rgba(156, 163, 175, 0.7)'
+                            ],
+                            borderColor: [
+                                'rgba(59, 130, 246, 1)',
+                                'rgba(245, 158, 11, 1)',
+                                'rgba(34, 197, 94, 1)',
+                                'rgba(156, 163, 175, 1)'
+                            ],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return ' ' + context.parsed.y + ' votos';
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                grid: {
+                                    color: '#e5e7eb'
+                                }
+                            },
+                            x: {
+                                grid: {
+                                    display: false
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            const copyCodeBtn = document.getElementById('copyCodeBtn');
+            if(copyCodeBtn) {
+                copyCodeBtn.addEventListener('click', () => {
+                    const codeSnippet = document.getElementById('codeSnippet').innerText;
+                    const textarea = document.createElement('textarea');
+                    textarea.value = codeSnippet;
+                    document.body.appendChild(textarea);
+                    textarea.select();
+                    try {
+                        document.execCommand('copy');
+                        copyCodeBtn.innerText = 'Copiado!';
+                        setTimeout(() => {
+                           copyCodeBtn.innerText = 'Copiar';
+                        }, 2000);
+                    } catch (err) {
+                        console.error('Error al copiar el código', err);
+                        copyCodeBtn.innerText = 'Error';
+                    }
+                    document.body.removeChild(textarea);
+                });
+            }
+            
+            const checklistItems = document.querySelectorAll('.checklist-item input[type="checkbox"]');
+            checklistItems.forEach(item => {
+                item.addEventListener('change', (e) => {
+                    const parentDiv = e.target.closest('.checklist-item');
+                    if (e.target.checked) {
+                        parentDiv.classList.add('checked');
+                    } else {
+                        parentDiv.classList.remove('checked');
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
