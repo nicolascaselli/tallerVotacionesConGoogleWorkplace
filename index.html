@@ -130,10 +130,10 @@
                 <div class="bg-white p-6 rounded-xl shadow-sm border border-stone-200">
                     <h2 class="text-2xl font-bold text-slate-800 mb-2">Paso 3: Sigue los Resultados en Vivo 📊</h2>
                     <p class="text-slate-600 mb-6">La transparencia es clave. Google ofrece formas de visualizar los resultados en tiempo real, accesibles para toda la comunidad.</p>
-                    <div class="space-y-4">
+                    <div class="space-y-6">
                         <div>
                             <h3 class="font-bold text-lg text-slate-700">Opción Rápida: Resumen de Forms</h3>
-                            <p class="text-sm text-slate-600 mt-1">Dentro de la pestaña "Respuestas" de tu formulario, verás gráficos automáticos. Puedes compartir un enlace a este resumen para que todos sigan el conteo al instante.</p>
+                            <p class="text-sm text-slate-600 mt-1 mb-4">Dentro de la pestaña "Respuestas" de tu formulario, verás gráficos automáticos. Puedes compartir un enlace a este resumen para que todos sigan el conteo al instante.</p>
                         </div>
                         <div class="p-4 border border-stone-200 rounded-lg bg-stone-50">
                             <h3 class="font-bold text-lg text-slate-700 mb-2">Ejemplo de Visualización de Resultados</h3>
@@ -142,9 +142,54 @@
                                 <canvas id="resultsChart"></canvas>
                             </div>
                         </div>
-                        <div>
+                        <div class="border-t border-stone-200 pt-6">
                             <h3 class="font-bold text-lg text-slate-700">Opción Profesional: Looker Studio</h3>
-                            <p class="text-sm text-slate-600 mt-1">Para un análisis más profundo, puedes conectar la hoja de respuestas de Google Sheets a Looker Studio y crear paneles interactivos con filtros y métricas personalizadas.</p>
+                            <p class="text-sm text-slate-600 mt-1 mb-4">Para un análisis más profundo, puedes conectar la hoja de respuestas de Google Sheets a Looker Studio (ahora parte de Google Cloud) y crear paneles interactivos con filtros y métricas personalizadas.</p>
+                            
+                            <div class="p-4 border border-amber-300 rounded-lg bg-amber-50">
+                                <h4 class="font-semibold text-lg text-amber-800 mb-3">Guía Paso a Paso para Looker Studio:</h4>
+                                <ol class="list-decimal list-inside space-y-3 text-amber-700 text-sm">
+                                    <li>
+                                        <span class="font-semibold">Prepara tu Hoja de Google Sheets:</span> Asegúrate de que tu formulario de Google Forms esté guardando las respuestas en una Hoja de Cálculo de Google Sheets. Puedes crearla desde la pestaña "Respuestas" de tu formulario, haciendo clic en el ícono verde de Sheets. Verifica que los encabezados de las columnas sean claros (ej: "Opción Votada Lista A", "Marca de tiempo").
+                                    </li>
+                                    <li>
+                                        <span class="font-semibold">Accede a Looker Studio:</span> Ve a [lookerstudio.google.com](https://lookerstudio.google.com) e inicia sesión con tu cuenta de Google (la misma que usas para Forms y Sheets).
+                                    </li>
+                                    <li>
+                                        <span class="font-semibold">Crea un Nuevo Informe:</span> En la página principal de Looker Studio, haz clic en "Informe vacío" o en el botón "+ Crear" y luego "Informe".
+                                    </li>
+                                    <li>
+                                        <span class="font-semibold">Conecta tus Datos (Google Sheets):</span>
+                                        Looker Studio te pedirá que añadas datos al informe. En el panel "Añadir datos al informe", busca y selecciona "Hojas de cálculo de Google".
+                                    </li>
+                                    <li>
+                                        <span class="font-semibold">Autoriza y Selecciona tu Hoja:</span>
+                                        Es posible que necesites autorizar a Looker Studio para acceder a tus Google Sheets. Luego, busca y selecciona la hoja de cálculo donde se están guardando las respuestas de tu votación.
+                                        Asegúrate de seleccionar la hoja correcta dentro del archivo (normalmente llamada "Respuestas de formulario 1").
+                                        Marca las opciones "Usar la primera fila como encabezados" y "Incluir las celdas ocultas y filtradas" si es necesario.
+                                        Haz clic en "Añadir" en la esquina inferior derecha.
+                                    </li>
+                                    <li>
+                                        <span class="font-semibold">Confirma Añadir al Informe:</span> Te aparecerá un mensaje preguntando si quieres añadir los datos al informe. Haz clic en "Añadir al informe".
+                                    </li>
+                                    <li>
+                                        <span class="font-semibold">Diseña tu Panel Básico:</span>
+                                        Looker Studio creará automáticamente una tabla con tus datos. Puedes eliminarla si quieres.
+                                        Para añadir un gráfico, ve al menú "Insertar" y elige un tipo de gráfico (ej: "Gráfico circular" o "Gráfico de barras" son buenos para resultados de votaciones).
+                                        Arrastra el gráfico al lienzo. En el panel de la derecha ("Propiedades del gráfico"), en la pestaña "Datos":
+                                        <ul>
+                                            <li>- <span class="font-semibold">Dimensión:</span> Selecciona la columna de tu hoja que contiene las opciones votadas (ej: "Elige tu lista para Presidente/a").</li>
+                                            <li>- <span class="font-semibold">Métrica:</span> Selecciona "Número de registros" (esto contará cuántas veces aparece cada opción, es decir, los votos).</li>
+                                        </ul>
+                                    </li>
+                                    <li>
+                                        <span class="font-semibold">Personaliza y Comparte:</span>
+                                        Puedes cambiar colores, títulos y añadir más gráficos o filtros desde el menú "Insertar" y el panel de propiedades.
+                                        Cuando tu panel esté listo, haz clic en "Compartir" en la esquina superior derecha. Puedes obtener un enlace para compartirlo (configura los permisos para que otros puedan "Ver") o insertarlo en un sitio web.
+                                    </li>
+                                </ol>
+                                <p class="mt-4 text-xs text-amber-600">💡 ¡Explora las opciones! Looker Studio es muy potente y te permite crear visualizaciones dinámicas y atractivas para mostrar los resultados de tu elección con total transparencia.</p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -324,7 +369,7 @@
                             y: {
                                 beginAtZero: true,
                                 grid: {
-                                    color: '#e5e7eb'
+                                    color: '#e5e7eb' /* gray-200 */
                                 }
                             },
                             x: {
