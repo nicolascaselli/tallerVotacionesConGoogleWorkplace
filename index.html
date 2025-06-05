@@ -84,11 +84,11 @@
                                 </div>
                                 <div class="flex items-center justify-between p-3 bg-white rounded-md border">
                                     <span class="font-medium text-slate-700">Recopilar correos electrónicos</span>
-                                     <div class="w-12 h-6 flex items-center bg-stone-300 rounded-full p-1 justify-end">
+                                     <div class="w-12 h-6 flex items-center bg-green-500 rounded-full p-1">
                                         <div class="bg-white w-4 h-4 rounded-full shadow-md"></div>
                                     </div>
                                 </div>
-                                <p class="text-xs text-amber-700 bg-amber-50 p-2 rounded-md">🔒 Para asegurar el anonimato, <span class="font-bold">NO</span> actives "Recopilar correos". Forms seguirá controlando un voto por persona sin guardar la identidad.</p>
+                                <p class="text-xs text-amber-700 bg-amber-50 p-2 rounded-md">🔒 <span class="font-bold">IMPORTANTE:</span> Al activar "Recopilar correos electrónicos", el sistema guardará el email del votante. Esto es necesario si quieres enviar un "Recibo de Voto" (ver Paso 4). Un script se encargará de enviar el recibo y <span class="font-semibold">luego anonimizará el correo en la hoja de respuestas</span> para mantener la confidencialidad del voto.</p>
                             </div>
                         </div>
 
@@ -150,7 +150,7 @@
                                 <h4 class="font-semibold text-lg text-amber-800 mb-3">Guía Paso a Paso para Looker Studio:</h4>
                                 <ol class="list-decimal list-inside space-y-3 text-amber-700 text-sm">
                                     <li>
-                                        <span class="font-semibold">Prepara tu Hoja de Google Sheets:</span> Asegúrate de que tu formulario de Google Forms esté guardando las respuestas en una Hoja de Cálculo de Google Sheets. Puedes crearla desde la pestaña "Respuestas" de tu formulario, haciendo clic en el ícono verde de Sheets. Verifica que los encabezados de las columnas sean claros (ej: "Opción Votada Lista A", "Marca de tiempo").
+                                        <span class="font-semibold">Prepara tu Hoja de Google Sheets:</span> Asegúrate de que tu formulario de Google Forms esté guardando las respuestas en una Hoja de Cálculo de Google Sheets. Puedes crearla desde la pestaña "Respuestas" de tu formulario, haciendo clic en el ícono verde de Sheets. Verifica que los encabezados de las columnas sean claros (ej: "Dirección de correo electrónico", "Opción Votada Lista A", "Marca de tiempo").
                                     </li>
                                     <li>
                                         <span class="font-semibold">Accede a Looker Studio:</span> Ve a [lookerstudio.google.com](https://lookerstudio.google.com) e inicia sesión con tu cuenta de Google (la misma que usas para Forms y Sheets).
@@ -198,38 +198,101 @@
             <section id="avanzado" class="section-content">
                 <div class="bg-white p-6 rounded-xl shadow-sm border border-stone-200">
                     <h2 class="text-2xl font-bold text-slate-800 mb-2">Paso 4: Funciones Avanzadas con Apps Script 🧑‍💻</h2>
-                     <p class="text-slate-600 mb-6">Con un poco de código, puedes añadir capas extra de transparencia y confianza a tu proceso, como enviar un recibo de voto a cada participante.</p>
+                     <p class="text-slate-600 mb-6">Con un poco de código (Apps Script), puedes enviar un "recibo" de voto por correo y luego anonimizar el correo en la hoja de respuestas para mayor transparencia y confianza.</p>
                      
                      <div class="p-4 border border-stone-200 rounded-lg bg-stone-50">
-                        <h3 class="font-bold text-lg text-slate-700">"Recibo" de Voto por Correo</h3>
-                        <p class="text-sm text-slate-600 mt-1 mb-4">Este script envía automáticamente un correo de confirmación a cada votante sin comprometer el anonimato. El votante recibe una prueba de que su voto fue contado, incluyendo un ID único de respuesta.</p>
+                        <h3 class="font-bold text-lg text-slate-700">"Recibo" de Voto y Anonimización de Correo</h3>
+                        <p class="text-sm text-slate-600 mt-1 mb-2">Este script realiza dos acciones importantes:</p>
+                        <ol class="list-decimal list-inside space-y-1 text-sm text-slate-600 mb-4">
+                            <li>Envía automáticamente un correo de confirmación al votante.</li>
+                            <li>Anonimiza (reemplaza o borra) la dirección de correo electrónico del votante en la Hoja de Cálculo de Google Sheets donde se guardan las respuestas. Esto ocurre <span class="font-semibold">después</span> de enviar el correo de confirmación.</li>
+                        </ol>
                         
                         <div class="bg-slate-800 rounded-lg p-4 text-white text-sm relative">
                             <button id="copyCodeBtn" class="absolute top-2 right-2 bg-slate-600 hover:bg-amber-500 text-white text-xs font-bold py-1 px-2 rounded transition-colors">Copiar</button>
                             <pre><code id="codeSnippet" class="language-javascript">function onFormSubmit(e) {
   try {
-    const email = Session.getActiveUser().getEmail();
+    const email = e.response.getRespondentEmail(); // Obtiene el correo gracias a la configuración del formulario
+
+    if (!email) {
+      console.warn('Correo del encuestado no disponible. No se puede enviar la confirmación.');
+      return; // Salir si por alguna razón no se obtuvo el email
+    }
+
     const responseId = e.response.getId();
     const timestamp = new Date().toLocaleString("es-CL");
 
     const subject = "Confirmación: Tu voto ha sido registrado";
     const body = \`¡Hola!\\n\\nConfirmamos que tu voto ha sido registrado correctamente.\\n\\nID de tu respuesta: \${responseId}\\nHora de registro: \${timestamp}\\n\\nGracias por participar,\\nComisión Electoral\`;
 
-    GmailApp.sendEmail(email, subject, body);
+    // Paso 1: Enviar el correo de confirmación
+    MailApp.sendEmail(email, subject, body);
+    console.log(\`Correo de confirmación enviado a: \${email} para la respuesta ID: \${responseId}\`);
+
+    // --- Paso 2: Anonimizar el correo en la hoja de cálculo ---
+
+    // Asegúrate de que el formulario esté vinculado a una hoja de cálculo
+    const form = e.source; // 'e.source' es el Formulario de Google que activó el evento
+    const spreadsheet = form.getDestinationId() ? SpreadsheetApp.openById(form.getDestinationId()) : null;
+
+    if (!spreadsheet) {
+      console.error("El formulario no está vinculado a una hoja de cálculo. No se puede anonimizar el correo.");
+      return; // No se puede anonimizar si no hay hoja
+    }
+
+    const sheet = spreadsheet.getSheetByName("Respuestas de formulario 1"); // **¡IMPORTANTE!** Cambia "Respuestas de formulario 1" al nombre exacto de la hoja donde se guardan tus respuestas.
+    if (!sheet) {
+      console.error("No se encontró la hoja de respuestas con el nombre especificado.");
+      return;
+    }
+
+    const headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+    // Busca la columna por su encabezado estándar en español. Si tu Forms está en otro idioma, ajusta este texto.
+    const emailColumnIndex = headers.findIndex(header => header.toLowerCase() === "dirección de correo electrónico"); 
+
+    if (emailColumnIndex === -1) {
+      console.error("No se encontró la columna 'Dirección de correo electrónico' en la hoja de respuestas. Verifica el nombre exacto del encabezado de la columna de correos.");
+      return; // No se puede anonimizar si no se encuentra la columna
+    }
+
+    const row = sheet.getLastRow(); // La última fila es la que se acaba de añadir
+    const column = emailColumnIndex + 1; // Las columnas en Apps Script son 1-based, no 0-based
+
+    // Opciones de anonimización:
+    // Opción A: Reemplazar con el ID de la respuesta (recomendado para rastreo anónimo)
+    sheet.getRange(row, column).setValue(\`Anonimizado (ID: \${responseId})\`);
+    console.log(\`Correo en fila \${row} anonimizado con ID de respuesta: \${responseId}\`);
+
+    // Opción B: Simplemente borrar el contenido de la celda
+    // sheet.getRange(row, column).clearContent();
+    // console.log(\`Correo en fila \${row} eliminado.\`);
+
   } catch (error) {
-    console.error("Error al enviar correo: " + error.toString());
+    console.error("Error en la función onFormSubmit: " + error.toString());
   }
 }</code></pre>
                         </div>
+                        <p class="text-xs text-red-600 bg-red-100 p-2 mt-3 rounded-md"><span class="font-bold">¡Atención!</span> En el código, la línea `const sheet = spreadsheet.getSheetByName("Respuestas de formulario 1");` es crucial. Debes reemplazar `"Respuestas de formulario 1"` por el nombre exacto de la hoja en tu Google Sheets donde se guardan las respuestas del formulario. Usualmente es ese, pero verifica.</p>
+                        <p class="mt-2 text-xs text-slate-600">También, el script busca la columna de correos por el encabezado "Dirección de correo electrónico". Si tu formulario está en otro idioma o has cambiado ese encabezado manualmente en la hoja, deberás ajustar esa parte del código.</p>
 
                          <div class="mt-4">
                              <h4 class="font-semibold text-slate-700">Cómo implementarlo:</h4>
                              <ol class="list-decimal list-inside space-y-1 text-sm text-slate-600 mt-2">
                                 <li>En tu Formulario, ve a (⋮) > "Editor de secuencias de comandos".</li>
-                                <li>Pega el código de arriba. Guarda el proyecto.</li>
-                                <li>Ve a la sección "Activadores" (reloj ⏰).</li>
-                                <li>Añade un nuevo activador que ejecute la función `onFormSubmit` "Desde el formulario" y "Al enviar el formulario".</li>
-                                <li>Autoriza los permisos que te solicite. ¡Listo!</li>
+                                <li>Borra cualquier código que haya y pega el script de arriba.</li>
+                                <li><span class="font-semibold">Modifica la línea</span> `const sheet = spreadsheet.getSheetByName("Respuestas de formulario 1");` si el nombre de tu hoja de respuestas es diferente.</li>
+                                <li>Guarda el proyecto (ícono del disquete 💾). Dale un nombre (ej: "ReciboAnonimizarVoto").</li>
+                                <li>Ve a "Activadores" (ícono del reloj ⏰) en el menú de la izquierda.</li>
+                                <li>Haz clic en "+ Añadir activador" (abajo a la derecha).</li>
+                                <li>Configúralo así:
+                                    <ul class="list-disc list-inside ml-4 my-1">
+                                        <li>Función a ejecutar: `onFormSubmit`</li>
+                                        <li>Implementación: `Principal`</li>
+                                        <li>Selecciona la fuente del evento: `Desde el formulario`</li>
+                                        <li>Selecciona el tipo de evento: `Al enviar el formulario`</li>
+                                    </ul>
+                                </li>
+                                <li>Guarda el activador. Te pedirá permisos para acceder a tu cuenta (para enviar correos y modificar la hoja de cálculo). Revisa los permisos que solicita (deberían incluir Gmail y Google Sheets) y acéptalos.</li>
                              </ol>
                          </div>
                      </div>
@@ -247,7 +310,7 @@
                         </div>
                         <div class="p-4 border border-stone-200 rounded-lg bg-stone-50">
                             <h3 class="font-bold text-lg text-slate-700 mb-2">2. Respaldar los Datos</h3>
-                            <p class="text-slate-600">Abre la hoja de Google Sheets conectada a tu formulario. Ve a `Archivo > Descargar > Microsoft Excel (.xlsx)` y guarda este archivo en una carpeta segura de Google Drive con permisos de "Solo lectura" para la comunidad.</p>
+                            <p class="text-slate-600">Abre la hoja de Google Sheets conectada a tu formulario (donde ahora los correos estarán anonimizados). Ve a `Archivo > Descargar > Microsoft Excel (.xlsx)` y guarda este archivo en una carpeta segura de Google Drive con permisos de "Solo lectura" para la comunidad.</p>
                         </div>
                     </div>
                 </div>
@@ -264,7 +327,7 @@
                         </div>
                          <div class="checklist-item flex items-start">
                             <input id="check2" type="checkbox" class="h-5 w-5 rounded border-gray-300 text-amber-600 focus:ring-amber-500 mt-1 cursor-pointer">
-                            <label for="check2" class="ml-3 text-slate-700 cursor-pointer">Formulario configurado para NO recopilar correos (anonimato).</label>
+                            <label for="check2" class="ml-3 text-slate-700 cursor-pointer">Formulario configurado para <span class="font-semibold">SÍ</span> recopilar correos (para recibo y posterior anonimización).</label>
                         </div>
                          <div class="checklist-item flex items-start">
                             <input id="check3" type="checkbox" class="h-5 w-5 rounded border-gray-300 text-amber-600 focus:ring-amber-500 mt-1 cursor-pointer">
@@ -276,11 +339,11 @@
                         </div>
                          <div class="checklist-item flex items-start">
                             <input id="check5" type="checkbox" class="h-5 w-5 rounded border-gray-300 text-amber-600 focus:ring-amber-500 mt-1 cursor-pointer">
-                            <label for="check5" class="ml-3 text-slate-700 cursor-pointer">Publicado el enlace al resumen de Forms para ver resultados.</label>
+                            <label for="check5" class="ml-3 text-slate-700 cursor-pointer">Publicado el enlace al resumen de Forms o Panel Looker Studio para ver resultados.</label>
                         </div>
                         <div class="checklist-item flex items-start">
                             <input id="check6" type="checkbox" class="h-5 w-5 rounded border-gray-300 text-amber-600 focus:ring-amber-500 mt-1 cursor-pointer">
-                            <label for="check6" class="ml-3 text-slate-700 cursor-pointer">(Opcional) Script de recibo de voto probado y funcionando.</label>
+                            <label for="check6" class="ml-3 text-slate-700 cursor-pointer">Apps Script de recibo y anonimización probado y funcionando correctamente (incluida la configuración del nombre de la hoja).</label>
                         </div>
                         <div class="checklist-item flex items-start">
                             <input id="check7" type="checkbox" class="h-5 w-5 rounded border-gray-300 text-amber-600 focus:ring-amber-500 mt-1 cursor-pointer">
